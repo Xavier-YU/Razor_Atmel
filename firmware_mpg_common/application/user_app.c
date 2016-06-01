@@ -88,7 +88,7 @@ Promises:
 */
 void UserAppInitialize(void)
 {
-  
+  /*test comment for github*/
   /* If good initialization, set state to Idle */
   if( 1 )
   {
