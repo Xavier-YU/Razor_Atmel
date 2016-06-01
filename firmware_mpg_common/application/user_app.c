@@ -147,35 +147,61 @@ State Machine Function Definitions
 static void UserAppSM_Idle(void)
 {
     static bool bYellowBlink = FALSE;
+    static u8 u8BlinkFrequencyIndex = 0;
+    static LedRateType ledrateTable[]={LED_1HZ, LED_2HZ, LED_4HZ, LED_8HZ}; 
     if(IsButtonPressed(BUTTON0))
     {
-      /* The button is currently pressed, so make sure the LED is on */
+      /* The button0 is currently pressed, so make sure the LED is on */
 
       LedOn(WHITE);
     }
     else
     {
-        /* The button is not pressed, so make sure the LED is off */
+        /* The button0 is not pressed, so make sure the LED is off */
 
       LedOff(WHITE);
     }
-    
     if(WasButtonPressed(BUTTON1))
     {
       /*ACK the button press*/
       ButtonAcknowledge(BUTTON1);   
       if(bYellowBlink)
       {
+        /*The button was pressed,so the yellow LED should be off*/
         bYellowBlink = FALSE;
         LedOff(YELLOW);
       }
       else
       {
+        /*The button was pressed,so the yellow LED should be blinking at current rate*/
         bYellowBlink = TRUE;
-        LedBlink(YELLOW, LED_1HZ);
+        LedBlink(YELLOW, ledrateTable[u8BlinkFrequencyIndex]);
       }
     }
     
+    if(WasButtonPressed(BUTTON2))
+    {
+      /*ACK the button press*/
+      ButtonAcknowledge(BUTTON2);
+
+      if(!bYellowBlink)
+      {
+        LedOff(YELLOW);
+      }
+      else
+      {
+        /*change the current blink rate*/
+        if(u8BlinkFrequencyIndex == 3)
+        {
+          u8BlinkFrequencyIndex = 0;
+        }
+        else
+        {
+          u8BlinkFrequencyIndex++;
+        }        
+        LedBlink(YELLOW, ledrateTable[u8BlinkFrequencyIndex]);
+      }
+    }
     if(IsButtonHeld(BUTTON3,2000))
     {
       LedOn(CYAN);
