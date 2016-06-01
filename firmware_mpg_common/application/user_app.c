@@ -88,7 +88,17 @@ Promises:
 */
 void UserAppInitialize(void)
 {
-  /*test comment for github*/
+  LedPWM(RED, LED_PWM_5); 
+  LedPWM(WHITE, LED_PWM_5);
+  LedOff(PURPLE);
+  LedOff(BLUE);
+  LedOff(CYAN);
+  LedOff(GREEN);
+  LedOff(YELLOW);
+  LedOff(ORANGE); 
+  LedOn(LCD_RED);
+  LedOff(LCD_GREEN);
+  LedOff(LCD_BLUE);
   /* If good initialization, set state to Idle */
   if( 1 )
   {
@@ -137,7 +147,62 @@ State Machine Function Definitions
 /* Wait for a message to be queued */
 static void UserAppSM_Idle(void)
 {
+  static LedNumberType u8LedControl[] = {WHITE, PURPLE, BLUE, CYAN, GREEN, YELLOW, ORANGE, RED};
+  static bool boolflag = TRUE;
+  static u8 u8CurrentLedIndex  = 1;
+  static u16 u16Counter = 0;
+  static u8 u8LedCurrentLevel  = 10;  
+  u16Counter++;
+  if(u16Counter == 500)
+  {
+    u16Counter = 0;
+    if(boolflag)
+    {
+      if(u8CurrentLedIndex != 0)
+      {
+        LedOff(u8LedControl[u8CurrentLedIndex-1]);
+        LedOff(u8LedControl[8-u8CurrentLedIndex]);
+      }
+      LedPWM( (LedNumberType)u8LedControl[u8CurrentLedIndex], (LedRateType)u8LedCurrentLevel);
+      LedPWM( (LedNumberType)u8LedControl[7-u8CurrentLedIndex], (LedRateType)u8LedCurrentLevel); 
+    }
+    else
+    {
+      if(u8CurrentLedIndex != 3)
+      {
+        LedOff(u8LedControl[u8CurrentLedIndex+1]);
+        LedOff(u8LedControl[6-u8CurrentLedIndex]);
+      }
+      LedPWM( (LedNumberType)u8LedControl[u8CurrentLedIndex], (LedRateType)u8LedCurrentLevel);
+      LedPWM( (LedNumberType)u8LedControl[7-u8CurrentLedIndex], (LedRateType)u8LedCurrentLevel);
+    }
     
+    if(u8CurrentLedIndex % 2 == 0)
+    {
+      LedOn(LCD_RED);
+      LedOff(LCD_BLUE);
+    }
+    else
+    {
+      LedOn(LCD_BLUE);
+      LedOff(LCD_RED);
+    }
+    
+    if(u8CurrentLedIndex == 3 || u8CurrentLedIndex == 0)
+    {
+      boolflag = !boolflag;  
+    }
+    if(boolflag)
+    {
+      u8CurrentLedIndex++;
+      u8LedCurrentLevel += 5;
+    }
+    else
+    {
+      u8CurrentLedIndex--;
+      u8LedCurrentLevel -= 5;      
+    }
+  }
 } /* end UserAppSM_Idle() */
      
 
