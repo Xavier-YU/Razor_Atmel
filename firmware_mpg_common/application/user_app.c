@@ -88,6 +88,15 @@ Promises:
 */
 void UserAppInitialize(void)
 {
+  LedOff(WHITE);
+  LedOff(PURPLE);
+  LedOff(BLUE);
+  LedOff(CYAN);
+  LedOff(GREEN);
+  LedOff(YELLOW);
+  LedOff(ORANGE);
+  LedOff(RED);
+  
   /*test comment for github*/
   /* If good initialization, set state to Idle */
   if( 1 )
@@ -137,7 +146,46 @@ State Machine Function Definitions
 /* Wait for a message to be queued */
 static void UserAppSM_Idle(void)
 {
+    static bool bYellowBlink = FALSE;
+    if(IsButtonPressed(BUTTON0))
+    {
+      /* The button is currently pressed, so make sure the LED is on */
+
+      LedOn(WHITE);
+    }
+    else
+    {
+        /* The button is not pressed, so make sure the LED is off */
+
+      LedOff(WHITE);
+    }
     
+    if(WasButtonPressed(BUTTON1))
+    {
+      /*ACK the button press*/
+      ButtonAcknowledge(BUTTON1);   
+      if(bYellowBlink)
+      {
+        bYellowBlink = FALSE;
+        LedOff(YELLOW);
+      }
+      else
+      {
+        bYellowBlink = TRUE;
+        LedBlink(YELLOW, LED_1HZ);
+      }
+    }
+    
+    if(IsButtonHeld(BUTTON3,2000))
+    {
+      LedOn(CYAN);
+    }
+    else
+    {
+      LedOff(CYAN);
+    }
+    
+
 } /* end UserAppSM_Idle() */
      
 
