@@ -88,7 +88,7 @@ Promises:
 */
 void UserAppInitialize(void)
 { 
-  
+  /*initialize the buzzer and leds*/ 
   PWMAudioOn(BUZZER1);
   LedOff(RED); 
   LedOff(WHITE);
@@ -152,7 +152,7 @@ static void UserAppSM_Idle(void)
   static u8 u8CurrentTuneIndex = 0;
   
   u16Counter++;
-  
+  /*change the audio frequency and leds every 350ms*/
   if(u16Counter == 350)
   {
     u16Counter = 0;
@@ -164,6 +164,9 @@ static void UserAppSM_Idle(void)
     {    
       u8CurrentTuneIndex++;
     }
+    
+    /*choose the frequency according to the TuneTable*/
+    /*leds should be on or off with different frequency*/
     switch(u8TuneTable[u8CurrentTuneIndex])
     {
       case 0:PWMAudioSetFrequency(BUZZER1, 262);
