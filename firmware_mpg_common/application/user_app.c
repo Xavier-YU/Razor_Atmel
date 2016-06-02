@@ -88,7 +88,8 @@ Promises:
 */
 void UserAppInitialize(void)
 {
-  PWMAudioSetFrequency(BUZZER1,8000);
+  
+  PWMAudioOn(BUZZER1);
   /*test comment for github*/
   /* If good initialization, set state to Idle */
   if( 1 )
@@ -138,47 +139,38 @@ State Machine Function Definitions
 /* Wait for a message to be queued */
 static void UserAppSM_Idle(void)
 {
-  if(WasButtonPressed(BUTTON0))
-  {
-    ButtonAcknowledge(BUTTON0);
-    PWMAudioSetFrequency(BUZZER1, 262);
-  }
-  if(IsButtonPressed(BUTTON0))
-  {
-    PWMAudioOn(BUZZER1);
-  }
+  static u8 u8TuneTable[] = {2,1,0,1,2,2,2,1,1,1,2,3,3,2,1,0,1,2,2,2,2,1,1,2,1,0};
+  static u16 u16Counter = 0;
+  static u8 u8CurrentTuneIndex = 0;
   
+  u16Counter++;
   
-  if(WasButtonPressed(BUTTON1))
+  if(u16Counter == 500)
   {
-    ButtonAcknowledge(BUTTON1);
-    PWMAudioSetFrequency(BUZZER1, 294);
+    u16Counter = 0;
+    if(u8CurrentTuneIndex == 25)
+    {
+      u8CurrentTuneIndex = 0;
+    }
+    else
+    {    
+      u8CurrentTuneIndex++;
+    }
+    switch(u8TuneTable[u8CurrentTuneIndex])
+    {
+      case 0:PWMAudioSetFrequency(BUZZER1, 262);
+             break;
+      case 1:PWMAudioSetFrequency(BUZZER1, 294);
+             break;
+      case 2:PWMAudioSetFrequency(BUZZER1, 330);
+             break;
+      case 3:PWMAudioSetFrequency(BUZZER1, 392);
+             break; 
+      default:PWMAudioOff(BUZZER1); 
+               break;
+    }
   }
-  if(IsButtonPressed(BUTTON1))
-  {
-    PWMAudioOn(BUZZER1);
-  }
-  
-  if(WasButtonPressed(BUTTON2))
-  {
-    ButtonAcknowledge(BUTTON2);
-    PWMAudioSetFrequency(BUZZER1, 330);
-  }
-  if(IsButtonPressed(BUTTON2))
-  {
-    PWMAudioOn(BUZZER1);
-  }
-  
-  
-  if(WasButtonPressed(BUTTON3))
-  {
-    ButtonAcknowledge(BUTTON3);
-    PWMAudioSetFrequency(BUZZER1, 392);
-  }
-  if(IsButtonPressed(BUTTON3))
-  {
-    PWMAudioOn(BUZZER1);
-  }
+ 
     
 } /* end UserAppSM_Idle() */
      
