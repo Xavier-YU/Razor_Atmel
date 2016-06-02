@@ -87,9 +87,17 @@ Promises:
   - 
 */
 void UserAppInitialize(void)
-{
+{ 
   
   PWMAudioOn(BUZZER1);
+  LedOff(RED); 
+  LedOff(WHITE);
+  LedOff(PURPLE);
+  LedOff(BLUE);
+  LedOff(CYAN);
+  LedOff(GREEN);
+  LedOff(YELLOW);
+  LedOff(ORANGE); 
   /*test comment for github*/
   /* If good initialization, set state to Idle */
   if( 1 )
@@ -145,7 +153,7 @@ static void UserAppSM_Idle(void)
   
   u16Counter++;
   
-  if(u16Counter == 500)
+  if(u16Counter == 350)
   {
     u16Counter = 0;
     if(u8CurrentTuneIndex == 25)
@@ -159,12 +167,28 @@ static void UserAppSM_Idle(void)
     switch(u8TuneTable[u8CurrentTuneIndex])
     {
       case 0:PWMAudioSetFrequency(BUZZER1, 262);
+             LedOn(WHITE);
+             LedOff(PURPLE);
+             LedOff(BLUE);
+             LedOff(CYAN);
              break;
       case 1:PWMAudioSetFrequency(BUZZER1, 294);
+             LedOn(WHITE);
+             LedOn(PURPLE);
+             LedOff(BLUE);
+             LedOff(CYAN);
              break;
       case 2:PWMAudioSetFrequency(BUZZER1, 330);
+             LedOn(WHITE);
+             LedOn(PURPLE);
+             LedOn(BLUE);
+             LedOff(CYAN);
              break;
       case 3:PWMAudioSetFrequency(BUZZER1, 392);
+             LedOn(WHITE);
+             LedOn(PURPLE);
+             LedOn(BLUE);
+             LedOn(CYAN);
              break; 
       default:PWMAudioOff(BUZZER1); 
                break;
