@@ -52,6 +52,8 @@ extern volatile u32 G_u32ApplicationFlags;             /* From main.c */
 extern volatile u32 G_u32SystemTime1ms;                /* From board-specific source file */
 extern volatile u32 G_u32SystemTime1s;                 /* From board-specific source file */
 
+extern u8 G_au8DebugScanfBuffer[];                     /* From debug.c */
+extern u8 G_u8DebugScanfCharCount;                     /* From debug.c  */
 
 /***********************************************************************************************************************
 Global variable definitions with scope limited to this local application.
@@ -148,7 +150,43 @@ State Machine Function Definitions
 /* Wait for a message to be queued */
 static void UserAppSM_Idle(void)
 {
+  static u8 u8CounterFor5ms = 0;
+  static u32 u32TotalNumberOfCharacter = 0;
+  static u8 u8CurrentLcdAddress = LINE2_START_ADDR;
+  static u8 u8TermInputBuffer[8] = {0};
+  
+  u8CounterFor5ms++;
+
+  if(u8CounterFor5ms == 5)
+  {
+    u8CounterFor5ms = 0;
     
+    /*check debug input every 5 ms*/
+    if(DebugScanf(u8TermInputBuffer))
+    {
+      /*Keep track of the total number of characters that have been received*/
+      u32TotalNumberOfCharacter++;
+      
+      /*when the cursor returns to the beginning,clear the whole line*/
+      if(u8CurrentLcdAddress == LINE2_START_ADDR)
+      {
+        LCDClearChars(LINE2_START_ADDR, 20);   
+      }
+      
+      /*display the character inputed on the lcd*/
+      LCDMessage(u8CurrentLcdAddress,u8TermInputBuffer);
+      
+      if(u8CurrentLcdAddress >= LINE2_END_ADDR)
+      {
+        /*Once the screen is full, clear Line 2 and start again from the left*/
+        u8CurrentLcdAddress = LINE2_START_ADDR;     
+      }
+      else
+      {
+        u8CurrentLcdAddress++;
+      }
+    }   
+  }
 } /* end UserAppSM_Idle() */
      
 
