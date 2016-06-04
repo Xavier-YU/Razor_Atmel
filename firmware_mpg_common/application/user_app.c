@@ -154,9 +154,15 @@ static void UserAppSM_Idle(void)
   static u32 u32TotalNumberOfCharacter = 0;
   static u8 u8CurrentLcdAddress = LINE2_START_ADDR;
   static u8 u8TermInputBuffer[8] = {0};
+  static u8 u8CorrectInputBuffer[8] = {0};
+  
+  static u8 u8CorrectInputIndex = 0;
+  
   u8 u8MessageTotalCharacters[] = "Total characters received: ";
   u8 u8MessageCharacterCountClear[] = "Character count cleared!";
-  
+  u8 u8MessageCurrentBuffer[] = "Current letter buffer: ";
+  u8 u8MyName[] = "Xavier";
+    
   u8CounterFor5ms++;
   
   /*BUTTON0 clears the line of text so the next character starts from the beginning*/
@@ -184,6 +190,16 @@ static void UserAppSM_Idle(void)
     u32TotalNumberOfCharacter = 0;
     DebugLineFeed();
     DebugPrintf(u8MessageCharacterCountClear);
+    DebugLineFeed();
+  }
+ 
+  /*BUTTON3 prints the current letter buffer that is storing my name*/
+  if(WasButtonPressed(BUTTON3))
+  {
+    ButtonAcknowledge(BUTTON3);
+    DebugLineFeed();
+    DebugPrintf(u8MessageCurrentBuffer);   
+    DebugPrintf(u8CorrectInputBuffer);
     DebugLineFeed();
   }
   
@@ -214,6 +230,26 @@ static void UserAppSM_Idle(void)
       else
       {
         u8CurrentLcdAddress++;
+      }
+      
+      /*Compare the character and ignore uppercase OR lowercase*/
+      if(u8TermInputBuffer[0] == u8MyName[u8CorrectInputIndex] || u8TermInputBuffer[0] == u8MyName[u8CorrectInputIndex] - 32 ||u8TermInputBuffer[0] == u8MyName[u8CorrectInputIndex] + 32)
+      {
+        u8CorrectInputBuffer[u8CorrectInputIndex] = u8TermInputBuffer[0];
+        if(u8CorrectInputIndex == 5)
+        {
+          /*if all characters are correct clear the buffer and set the flag*/
+          u8CorrectInputIndex = 0;
+          for(u8 i = 0;i < 8;i++)
+          {
+            u8CorrectInputBuffer[i] = 0;
+          }
+          LedOn(RED);
+        }
+        else
+        {
+          u8CorrectInputIndex++;
+        }
       }
     }   
   }
