@@ -154,9 +154,39 @@ static void UserAppSM_Idle(void)
   static u32 u32TotalNumberOfCharacter = 0;
   static u8 u8CurrentLcdAddress = LINE2_START_ADDR;
   static u8 u8TermInputBuffer[8] = {0};
+  u8 u8MessageTotalCharacters[] = "Total characters received: ";
+  u8 u8MessageCharacterCountClear[] = "Character count cleared!";
   
   u8CounterFor5ms++;
-
+  
+  /*BUTTON0 clears the line of text so the next character starts from the beginning*/
+  if(WasButtonPressed(BUTTON0))
+  {
+    ButtonAcknowledge(BUTTON0);
+    LCDClearChars(LINE2_START_ADDR, 20);
+    u8CurrentLcdAddress = LINE2_START_ADDR;     
+  }
+  
+  /*BUTTON1 prints the total number of characters received on the debug port */
+  if(WasButtonPressed(BUTTON1))
+  {
+    ButtonAcknowledge(BUTTON1);
+    DebugLineFeed();
+    DebugPrintf(u8MessageTotalCharacters);
+    DebugPrintNumber(u32TotalNumberOfCharacter);
+    DebugLineFeed();
+  }
+  
+  /*BUTTON2 clears the total character count and reports a message*/
+  if(WasButtonPressed(BUTTON2))
+  {
+    ButtonAcknowledge(BUTTON2);
+    u32TotalNumberOfCharacter = 0;
+    DebugLineFeed();
+    DebugPrintf(u8MessageCharacterCountClear);
+    DebugLineFeed();
+  }
+  
   if(u8CounterFor5ms == 5)
   {
     u8CounterFor5ms = 0;
