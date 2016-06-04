@@ -88,6 +88,17 @@ Promises:
 */
 void UserAppInitialize(void)
 {
+  static u8 u8MyName[] = "A3. Xavier YU";
+  
+  /*show my name at lcd line1*/
+  LCDCommand(LCD_CLEAR_CMD);
+  LCDMessage(LINE1_START_ADDR,u8MyName); 
+  
+  /*change the lcd backlight to green*/
+  LedOn(LCD_GREEN);
+  LedOff(LCD_RED);
+  LedOff(LCD_BLUE);
+  
   /*test comment for github*/
   /* If good initialization, set state to Idle */
   if( 1 )
