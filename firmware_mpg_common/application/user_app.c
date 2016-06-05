@@ -162,7 +162,8 @@ static void UserAppSM_Idle(void)
   u8 u8MessageCharacterCountClear[] = "Character count cleared!";
   u8 u8MessageCurrentBuffer[] = "Current letter buffer: ";
   u8 u8MyName[] = "Xavier";
-    
+  u8 u8MessageEmpty[] = "Buffer is empty now.";
+  
   u8CounterFor5ms++;
   
   /*BUTTON0 clears the line of text so the next character starts from the beginning*/
@@ -198,8 +199,18 @@ static void UserAppSM_Idle(void)
   {
     ButtonAcknowledge(BUTTON3);
     DebugLineFeed();
-    DebugPrintf(u8MessageCurrentBuffer);   
-    DebugPrintf(u8CorrectInputBuffer);
+    DebugPrintf(u8MessageCurrentBuffer);
+    
+    /* Make sure there's at least one character in there! */
+    if(u8CorrectInputIndex == 0)
+    {
+      DebugPrintf(u8MessageEmpty);
+    }
+    else
+    {
+      DebugPrintf(u8CorrectInputBuffer);
+    }
+    
     DebugLineFeed();
   }
   
