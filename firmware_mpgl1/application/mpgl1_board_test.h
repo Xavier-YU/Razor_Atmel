@@ -23,8 +23,8 @@ Constants / Definitions
 #define   BOARDTEST_INIT_MSG_TIMEOUT      (u32)1000   /* Timeout for init display message to send */
 
 /* BoardTest ANT radio settings */
-#define	ANT_SERIAL_LO_BOARDTEST			          (u8)0x34
-#define ANT_SERIAL_HI_BOARDTEST			          (u8)0x12
+#define	ANT_SERIAL_LO_BOARDTEST			          (u8)0x15
+#define ANT_SERIAL_HI_BOARDTEST			          (u8)0x17
 #define	ANT_DEVICE_TYPE_BOARDTEST					    DEVICE_TYPE_BOARDTEST
 #define	ANT_TRANSMISSION_TYPE_BOARDTEST		    (u8)0x01
 
