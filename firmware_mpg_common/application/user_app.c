@@ -59,6 +59,7 @@ extern u32 G_u32AntApiCurrentDataTimeStamp;                       /* From ant_ap
 extern AntApplicationMessageType G_eAntApiCurrentMessageClass;    /* From ant_api.c */
 extern u8 G_au8AntApiCurrentData[ANT_APPLICATION_MESSAGE_BYTES];  /* From ant_api.c */
 
+extern u32 G_u32AntApiCurrentDataTimeStamp; /*From ant_api.c */
 /***********************************************************************************************************************
 Global variable definitions with scope limited to this local application.
 Variable names shall start with "UserApp_" and be declared as static.
@@ -159,7 +160,9 @@ static void UserAppSM_Idle(void)
 {
   static u8 au8TestMessage[] = {0, 0, 0, 0, 0xA5, 0, 0, 0};
   u8 au8DataContent[] = "xxxxxxxxxxxxxxxx";
-  
+  static u8 au8TimeStampMessage[32] = {0};
+  static u8 au8PreviousReceivedMessage[8] = {0};
+  static bool bReceivedChangeFlag = FALSE;  
   /* Check all the buttons and update au8TestMessage according to the button state */ 
   au8TestMessage[0] = 0x00;
   if( IsButtonPressed(BUTTON0) )
@@ -187,12 +190,30 @@ static void UserAppSM_Idle(void)
     if(G_eAntApiCurrentMessageClass == ANT_DATA)
     {
       /* We got some data */
-      for(u8 i = 0; i < ANT_DATA_BYTES; i++)
+      for(u8 i = 0; i < 8; i++)
       {
-        au8DataContent[2 * i]     = HexToASCIICharUpper(G_au8AntApiCurrentData[i] / 16);
-        au8DataContent[2 * i + 1] = HexToASCIICharUpper(G_au8AntApiCurrentData[i] % 16);
+        if(G_au8AntApiCurrentData[i] == 0xFF)
+        {
+          LedOn(i);
+        }
+        if(G_au8AntApiCurrentData[i] == 0x00)
+        {
+          LedOff(i);
+        }
+        if(G_au8AntApiCurrentData[i] != au8PreviousReceivedMessage[i])
+        {
+          bReceivedChangeFlag = TRUE;
+        } 
+         au8PreviousReceivedMessage[i] = G_au8AntApiCurrentData[i];
       }
-      LCDMessage(LINE2_START_ADDR, au8DataContent); 
+      if(bReceivedChangeFlag)
+      {
+        bReceivedChangeFlag = FALSE;
+        NumberToAscii(G_u32AntApiCurrentDataTimeStamp,au8TimeStampMessage);
+        LCDMessage(LINE2_START_ADDR,au8TimeStampMessage);
+      }
+      
+
     }
     else if(G_eAntApiCurrentMessageClass == ANT_TICK)
     {
