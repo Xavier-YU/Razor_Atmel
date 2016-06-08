@@ -52,6 +52,12 @@ extern volatile u32 G_u32ApplicationFlags;             /* From main.c */
 extern volatile u32 G_u32SystemTime1ms;                /* From board-specific source file */
 extern volatile u32 G_u32SystemTime1s;                 /* From board-specific source file */
 
+/* Existing variables (defined in other files -- should all contain the "extern" keyword) */
+extern AntSetupDataType G_stAntSetupData;                         /* From ant.c */
+
+extern u32 G_u32AntApiCurrentDataTimeStamp;                       /* From ant_api.c */
+extern AntApplicationMessageType G_eAntApiCurrentMessageClass;    /* From ant_api.c */
+extern u8 G_au8AntApiCurrentData[ANT_APPLICATION_MESSAGE_BYTES];  /* From ant_api.c */
 
 /***********************************************************************************************************************
 Global variable definitions with scope limited to this local application.
@@ -60,7 +66,8 @@ Variable names shall start with "UserApp_" and be declared as static.
 static fnCode_type UserApp_StateMachine;            /* The state machine function pointer */
 static u32 UserApp_u32Timeout;                      /* Timeout counter used across states */
 
-
+static u32 UserApp_u32DataMsgCount = 0;   /* ANT_DATA packets received */
+static u32 UserApp_u32TickMsgCount = 0;   /* ANT_TICK packets received */
 /**********************************************************************************************************************
 Function Definitions
 **********************************************************************************************************************/
@@ -88,8 +95,23 @@ Promises:
 */
 void UserAppInitialize(void)
 {
+  
+   /* Configure ANT for this application */
+  G_stAntSetupData.AntChannel          = ANT_CHANNEL_USERAPP;
+  G_stAntSetupData.AntSerialLo         = ANT_SERIAL_LO_USERAPP;
+  G_stAntSetupData.AntSerialHi         = ANT_SERIAL_HI_USERAPP;
+  G_stAntSetupData.AntDeviceType       = ANT_DEVICE_TYPE_USERAPP;
+  G_stAntSetupData.AntTransmissionType = ANT_TRANSMISSION_TYPE_USERAPP;
+  G_stAntSetupData.AntChannelPeriodLo  = ANT_CHANNEL_PERIOD_LO_USERAPP;
+  G_stAntSetupData.AntChannelPeriodHi  = ANT_CHANNEL_PERIOD_HI_USERAPP;
+  G_stAntSetupData.AntFrequency        = ANT_FREQUENCY_USERAPP;
+  G_stAntSetupData.AntTxPower          = ANT_TX_POWER_USERAPP;
   /*test comment for github*/
   /* If good initialization, set state to Idle */
+  if(AntChannelConfig(ANT_SLAVE))
+  {
+    LedOn(GREEN);
+  }
   if( 1 )
   {
     UserApp_StateMachine = UserAppSM_Idle;
@@ -137,7 +159,72 @@ State Machine Function Definitions
 /* Wait for a message to be queued */
 static void UserAppSM_Idle(void)
 {
-    
+  static u8 au8AntDataMessage[] = "ANT_DATA:xx-xx-xx-xx-xx-xx-xx-xx";
+  static u8 au8AntTickMessage[] = "ANT_TICK:xx-xx-xx-xx-xx-xx-xx-xx";
+  static u8 au8DataContent[] = "xxxxxxxxxxxxxxxx";
+
+  /*Button0 is presed . open the channel*/
+  if(WasButtonPressed(BUTTON0))
+  {
+    ButtonAcknowledge(BUTTON0);
+    AntOpenChannel();
+  }
+  
+  /*Button1 is pressed , close the channel*/
+  if(WasButtonPressed(BUTTON1))
+  {
+    ButtonAcknowledge(BUTTON1);
+    AntCloseChannel();
+  }
+  
+  /*check ANT status*/
+  if(AntRadioStatus() == ANT_OPEN)
+  {
+    LedOn(BLUE);
+    LedOff(RED);
+  }
+  else
+  {
+    LedOn(RED);
+    LedOff(BLUE);
+  }
+  
+  /* Always check for ANT messages */
+  if( AntReadData() )
+  {
+     /* New data message: check what it is */
+    if(G_eAntApiCurrentMessageClass == ANT_DATA)
+    {
+      UserApp_u32DataMsgCount++;
+      for(u8 i = 0; i < ANT_APPLICATION_MESSAGE_BYTES; i++)
+      {
+        au8AntDataMessage[3 * i + 9] = HexToASCIICharUpper(G_au8AntApiCurrentData[i] / 16);
+        au8AntDataMessage[3 * i + 10] = HexToASCIICharUpper(G_au8AntApiCurrentData[i] % 16);
+        au8DataContent[2 * i] = HexToASCIICharUpper(G_au8AntApiCurrentData[i] / 16);
+        au8DataContent[2*i+1] = HexToASCIICharUpper(G_au8AntApiCurrentData[i] % 16); 
+        DebugLineFeed();
+        DebugPrintf(au8AntDataMessage);
+        DebugLineFeed();
+        LCDClearChars(LINE2_START_ADDR, 20); 
+        LCDMessage(LINE2_START_ADDR, au8DataContent);
+      }
+    } /* end if(G_eAntApiCurrentMessageClass == ANT_DATA) */
+
+    else if(G_eAntApiCurrentMessageClass == ANT_TICK)
+    {
+      UserApp_u32TickMsgCount++;
+       for(u8 i = 0; i < ANT_APPLICATION_MESSAGE_BYTES; i++)
+      {
+        au8AntTickMessage[3 * i + 9] = HexToASCIICharUpper(G_au8AntApiCurrentData[i] / 16);
+        au8AntTickMessage[3 * i + 10] = HexToASCIICharUpper(G_au8AntApiCurrentData[i] % 16); 
+        DebugLineFeed();
+        DebugPrintf(au8AntTickMessage);
+        DebugLineFeed();
+      }     
+    } /* end else if(G_eAntApiCurrentMessageClass == ANT_TICK) */
+  } /* end AntReadData() */
+  
+  
 } /* end UserAppSM_Idle() */
      
 
