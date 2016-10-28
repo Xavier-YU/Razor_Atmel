@@ -57,7 +57,7 @@ Includes
 #include "buttons.h"
 #include "leds.h" 
 #include "messaging.h"
-
+#include "time.h"
 #include "sam3u_i2c.h"
 #include "sam3u_ssp.h"
 #include "sam3u_uart.h"
